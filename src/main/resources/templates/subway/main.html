@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>地铁图展示</title>
+    <script type="text/javascript"
+            src="//api.map.baidu.com/api?type=subway&v=1.0&ak=dhDqxYiu0SWUzxzR9FViGTBnf16PLlh7"></script>
+    <style>
+        #result {
+            padding: 7px 10px;
+            position: fixed;
+            top: 10px;
+            left: 250px;
+            width: 450px;
+            background: #fff;
+            box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+            border-radius: 7px;
+            z-index: 99;
+        }
+
+        #result input {
+            width: 130px;
+            margin-right: 10px;
+            height: 25px;
+            border: 1px solid rgba(27, 142, 236, 0.5);
+            border-radius: 5px;
+        }
+
+        #result button {
+            border: 1px solid rgba(27, 142, 236, 0.5);
+            border-radius: 5px;
+            background: rgba(27, 142, 236, 0.5);
+            color: #fff
+        }
+
+    </style>
+</head>
+<body>
+<div class="form-group" style="height:300px">
+    <div id="errorContainer"></div>
+    <div id="container" class="col-sm-12" style="height:600px"></div>
+</div>
+<div id='result'>
+    城市: <input id="city" type="text"/>
+    <button onclick="showsubway()"/>
+    查询</button>
+</div>
+<script type="text/javascript">
+
+    var subwayCityName = '哈尔滨';
+    var list = BMapSub.SubwayCitiesList;
+    var subwaycity = null;
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].name === subwayCityName) {
+            subwaycity = list[i];
+            break;
+        }
+    }
+    var subway = new BMapSub.Subway('container', subwaycity.citycode);
+    subway.setZoom(0.5);
+
+    var zoomControl = new BMapSub.ZoomControl({
+        anchor: BMAPSUB_ANCHOR_BOTTOM_RIGHT,
+        offset: new BMapSub.Size(10, 100)
+    });
+    subway.addControl(zoomControl);
+
+
+    subway.addEventListener('tap', function(e) {
+        // alert('您点击了"' + e.station.name + '"站');
+        var detail = new BMapSub.DetailInfo(subway);
+        detail.search(e.station.name);
+        var param = {
+            "logid":"logid",
+            "subway_city":subwayCityName,
+            "subway_station":e.station.name,
+            "date":"date"
+        }
+        var strJson = JSON.stringify(param); // js对象转字符串
+
+        $.ajax({
+            cache : true,
+            contentType: "application/json", //json请求
+            type : "POST",
+            url : "/subway/save",
+            data :strJson,
+            async : false,
+            success: function (r) {
+                console.log(r)},
+            error : function(request) {
+                parent.layer.alert("Connection error");
+            },
+        });
+    });
+
+    function showError(message) {
+        var errorContainer = document.getElementById("errorContainer");
+        errorContainer.innerText = message;
+        errorContainer.style.display = "block";
+    }
+
+    function hideError() {
+        var errorContainer = document.getElementById("errorContainer");
+        errorContainer.style.display = "none";
+    }
+
+    function showsubway() {
+        // removeAllEventListeners();
+        subway=null;
+        if (document.getElementById("city").value != "") {
+            var new_subwayCityName = document.getElementById("city").value;
+            var new_list = BMapSub.SubwayCitiesList;
+            var new_subwaycity = null;
+            for (var i = 0; i < new_list.length; i++) {
+                if (new_list[i].name === new_subwayCityName) {
+                    new_subwaycity = new_list[i];
+                    break;
+                }
+                if (i === new_list.length-1){
+                    showError("输入城市无地铁或城市不存在");
+                }
+            }
+            var new_subway = new BMapSub.Subway('container', new_subwaycity.citycode);
+            new_subway.setZoom(0.5);
+            var zoomControl = new BMapSub.ZoomControl({
+                anchor: BMAPSUB_ANCHOR_BOTTOM_RIGHT,
+                offset: new BMapSub.Size(10, 100)
+            });
+            new_subway.addControl(zoomControl);
+
+            new_subway.addEventListener('tap', function(e) {
+                // alert('您点击了"' + e.station.name + '"站');
+                var detail = new BMapSub.DetailInfo(new_subway);
+                detail.search(e.station.name);
+                var param = {
+                    "logid":"logid",
+                    "subway_city":new_subwayCityName,
+                    "subway_station":e.station.name,
+                    "date":"date"
+                }
+                var strJson = JSON.stringify(param); // js对象转字符串
+
+                $.ajax({
+                    cache : true,
+                    contentType: "application/json", //json请求
+                    type : "POST",
+                    url : "/subway/save",
+                    data :strJson,
+                    async : false,
+                    success: function (r) {
+                        console.log(r)},
+                    error : function(request) {
+                        parent.layer.alert("Connection error");
+                    },
+                });
+            });
+        }
+    }
+
+
+</script>
+</body>
+</html>
+
+
+
+
+
+

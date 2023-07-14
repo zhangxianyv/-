@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript"
+            src="//api.map.baidu.com/api?type=webgl&v=1.0&ak=dhDqxYiu0SWUzxzR9FViGTBnf16PLlh7"></script>
+    <title>根据经纬度定位</title>
+    <style>
+        html, body, #allmap {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #result {
+            padding: 7px 10px;
+            position: fixed;
+            top: 10px;
+            left: 20px;
+            width: 450px;
+            background: #fff;
+            box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+            border-radius: 7px;
+            z-index: 99;
+        }
+
+        #result input {
+            width: 130px;
+            margin-right: 10px;
+            height: 25px;
+            border: 1px solid rgba(27, 142, 236, 0.5);
+            border-radius: 5px;
+        }
+
+        #result button {
+            border: 1px solid rgba(27, 142, 236, 0.5);
+            border-radius: 5px;
+            background: rgba(27, 142, 236, 0.5);
+            color: #fff
+        }
+    </style>
+</head>
+<body>
+<div id='allmap'></div>
+<div id='result'>
+    经度: <input id="lng" type="text"/>
+    纬度: <input id="lat" type="text"/>
+    <button onclick="theLocation()"/>
+    查询</button>
+</div>
+<script>
+    // 百度地图API功能
+    var map = new BMapGL.Map("allmap");
+    map.centerAndZoom(new BMapGL.Point(116.331398, 39.897445), 11);
+    map.enableScrollWheelZoom(true);
+    var navi3DCtrl = new BMapGL.NavigationControl3D();  // 添加3D控件
+    map.addControl(navi3DCtrl);
+
+    map.enableScrollWheelZoom(true);
+    var menu = new BMapGL.ContextMenu();
+    var txtMenuItem = [
+        {
+            text: '放大一级',
+            callback: function () {
+                map.zoomIn();
+            }
+        }, {
+            text: '缩小一级',
+            callback: function () {
+                map.zoomOut();
+            }
+        }
+    ];
+
+    for (var i = 0; i < txtMenuItem.length; i++) {
+        menu.addItem(new BMapGL.MenuItem(txtMenuItem[i].text, txtMenuItem[i].callback, 100));
+    }
+    map.addContextMenu(menu);
+    var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
+    map.addControl(scaleCtrl);
+    var zoomCtrl = new BMapGL.ZoomControl();  // 添加缩放控件
+    map.addControl(zoomCtrl);
+
+    // 用经纬度设置地图中心点
+    function theLocation() {
+        if (document.getElementById("lng").value != "" && document.getElementById("lat").value != "") {
+            map.clearOverlays();
+            var new_point = new BMapGL.Point(document.getElementById("lng").value, document.getElementById("lat").value);
+            var marker = new BMapGL.Marker(new_point);  // 创建标注
+            map.addOverlay(marker);              // 将标注添加到地图中
+            map.panTo(new_point);
+        }
+        var param = {
+            "locid":"locid",
+            "lng":document.getElementById("lng").value,
+            "lat":document.getElementById("lat").value,
+            "date":"date"
+        };
+        var strJson = JSON.stringify(param); // js对象转字符串
+        $.ajax({
+            url: "/location/save",
+            cache : true,
+            contentType: "application/json", //json请求
+            type : "POST",
+            data: strJson,
+            success: function (r) {
+                console.log(r)},
+            error : function(request) {
+                parent.layer.alert("Connection error");
+            },
+        });
+
+    }
+</script>
+</body>
+</html>

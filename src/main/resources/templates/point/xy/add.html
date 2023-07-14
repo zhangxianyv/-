@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content ">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox float-e-margins">
+				<div class="ibox-content">
+					<form class="form-horizontal m-t" id="signupForm">
+						<div class="form-group" style = "display:none">
+							<label class="col-sm-3 control-label">wgs84Lon：</label>
+							<div class="col-sm-8">
+								<input id="wgs84Lon" name="wgs84Lon" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group"  style = "display:none">
+							<label class="col-sm-3 control-label">wgs84Lat：</label>
+							<div class="col-sm-8">
+								<input id="wgs84Lat" name="wgs84Lat" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label">bdLon：</label>
+							<div class="col-sm-8">
+								<input id="bdLon" name="bdLon" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label">bdLat：</label>
+							<div class="col-sm-8">
+								<input id="bdLat" name="bdLat" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group"  style = "display:none">
+							<label class="col-sm-3 control-label">bdDisName：</label>
+							<div class="col-sm-8">
+								<input id="bdDisName" name="bdDisName" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group"  style = "display:none">
+							<label class="col-sm-3 control-label">bdCityCode：</label>
+							<div class="col-sm-8">
+								<input id="bdCityCode" name="bdCityCode" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group"  style = "display:none">
+							<label class="col-sm-3 control-label">bdCityName：</label>
+							<div class="col-sm-8">
+								<input id="bdCityName" name="bdCityName" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group"  style = "display:none">
+							<label class="col-sm-3 control-label">bdDisCode：</label>
+							<div class="col-sm-8">
+								<input id="bdDisCode" name="bdDisCode" class="form-control" type="text">
+							</div>
+						</div>
+						<div class="form-group"  style = "display:none">
+							<label class="col-sm-3 control-label">pointDisId：</label>
+							<div class="col-sm-8">
+								<input id="pointDisId" name="pointDisId" class="form-control" type="text">
+							</div>
+						</div>
+
+						<div class="form-group" style = "height:300px">
+							<div id = "point_map" class="col-sm-12" style = "height:300px"></div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-8 col-sm-offset-3">
+								<button type="submit" class="btn btn-primary">提交</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript" src="/js/appjs/point/xy/add.js">
+</script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=dhDqxYiu0SWUzxzR9FViGTBnf16PLlh7"></script>
+
+<script>
+	var mapDemo = new BMapGL.Map("point_map");
+	var point = new BMapGL.Point(126.65500546097108,45.75883286408706);
+	mapDemo.centerAndZoom(point, 15);
+	mapDemo.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+	mapDemo.addEventListener('click', function(e) {
+		mapDemo.clearOverlays(); //删除所有点
+		var lat = e.latlng.lat;
+		var lon = e.latlng.lng	;
+		var marker = new BMapGL.Marker(new BMapGL.Point(lon, lat)); // 创建点
+		mapDemo.addOverlay(marker);            //增加点
+		// 点击的位置数据回填到对应的表单中
+		$("#bdLon").val(lon)
+		$("#bdLat").val(lat)
+	});
+</script>
+
+</body>
+</html>

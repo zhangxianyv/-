@@ -1,0 +1,244 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <meta charset="utf-8">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+<!--    <title>欢迎页</title>-->
+<!--    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">-->
+<!--    <link rel="stylesheet" href="css/bootstrap.min.css">-->
+<!--</head>-->
+<!--<style type="text/css">-->
+<!--    *{margin: 0;padding:0;}-->
+<!--    .logoDiv{-->
+<!--        width:100%;-->
+<!--        height: 100%;-->
+<!--        display: flex;-->
+<!--        justify-content: center;-->
+<!--        align-items: center;-->
+<!--    }-->
+
+<!--</style>-->
+<!--<body>-->
+
+<!--    <div class="panel-heading col-sm-12">行业管理</div>-->
+<!--    <div class = "logoDiv">-->
+<!--        <img src = "/img/main.jpg" />-->
+<!--    </div>-->
+
+<!--</body>-->
+<!--<script src="js/jquery.min.js"></script>-->
+<!--<script src="js/openTab.js"></script>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+
+<body class="gray-bg">
+
+
+
+<h1 align=center>访客监控</h1>
+<div id="left_div" class="col-md-3" style="height:70% ; border:1px solid #cccccc"> 1</div>
+<div id="md_div" class="col-md-6" style="height:70%; border:1px solid #cccccc"> 2</div>
+<div id="right_div" class="col-md-3" style="height:70%; border:1px solid #cccccc">
+    <div id="right_top_div" style="width:100%;height:50%">3</div>
+    <div id="right_bottom_div" style="width:100%;height:50%">4</div>
+</div>
+<div id="bottom_div" class="col-md-12" style="width:100%;height:20%; border:1px solid #cccccc"> 4</div>
+<div th:include="include :: footer"></div>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=q0tOZHuv6iRyqnyFXL1MH9Y3liZ0LSqE"></script>
+<!--<script type="text/javascript"-->
+<!--        src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=q0tOZHuv6iRyqnyFXL1MH9Y3liZ0LSqE"></script>-->
+<script type="text/javascript" src="http://api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
+
+<script src="/js/plugins/echarts/echarts-all.js"></script>
+<script>
+    $(function () {
+        show_left_chart();
+
+        show_center_map();
+
+        show_bottom_chart();
+
+        show_right_top();
+
+        show_right_bottom();
+    })
+
+    function show_right_bottom() {
+        var strJson = JSON.stringify({"city_code4": "2301"});
+        $.ajax({
+            url: "/point/queryDisPercent",
+            type: "post",
+            contentType: "application/json", //json请求
+            data: strJson, // js对象转字符串,
+            success: function (r) {
+                var return_data = eval('(' + r + ')');
+                console.log(r)
+                // todo 展示各地市人数占比
+                var myChart = echarts.init(document.getElementById("right_bottom_div"));
+                var option = {
+                    title: {
+                        text: '区县人数占比'
+                    }
+                    , series: [{
+                        radius: ['30%', '80%'],
+                        type: 'pie',
+                        data: return_data
+                    }]
+                }
+                myChart.setOption(option);
+            }
+        });
+    }
+
+    function show_right_top() {
+        $.ajax({
+            url: "/point/queryCityPercent",
+            type: "post",
+            contentType: "application/json", //json请求
+            data: {},
+            success: function (r) {
+                // todo 展示各地市人数占比
+                var return_data = eval('(' + r + ')');
+                var data_arr = new Array();
+                for (let i = 0; i < return_data.length; i++) {
+                    data_arr[i] = {"name": return_data[i].city_name, "value": return_data[i].num}
+                }
+                var myChart = echarts.init(document.getElementById("right_top_div"));
+                var option = {
+                    title: {
+                        text: '地市人数占比'
+                    }
+                    , series: [{
+                        type: 'pie',
+                        data: data_arr
+                    }]
+                }
+                myChart.setOption(option);
+            }
+        });
+    }
+
+    function show_bottom_chart() {
+        $.ajax({
+            url: "/point/queryAPINumDate",
+            type: "post",
+            contentType: "application/json", //json请求
+            data: {},
+            success: function (r) {
+                console.log(r)
+                // todo 组装折线图数据
+                var return_data = eval('(' + r + ')');
+                var x_data = new Array();
+                var num_data = new Array();
+                console.log(return_data)
+                for (var i = 0; i < return_data.length; i++) {
+                    x_data[i] = return_data[i].update_date;
+                    num_data[i] = return_data[i].num
+                }
+
+                var myChart = echarts.init(document.getElementById("bottom_div"));
+                var option = {
+                    title: {
+                        text: '2023年7月5日区县访客情况'
+                    },
+                    xAxis: {
+                        data: x_data
+                    },
+                    yAxis: {}
+                    , series: [{
+                        type: 'line',
+                        data: num_data
+                    }
+                    ]
+                }
+                myChart.setOption(option);
+            }
+        });
+
+    }
+
+    function show_center_map() {
+        var map = new BMap.Map("md_div");
+        var point = new BMap.Point(126.73172549805368, 45.769011272739259);
+        map.centerAndZoom(point, 12);
+        map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+        $.ajax({
+            url: "/point/queryAllPoint",
+            type: "post",
+            contentType: "application/json", //json请求
+            data: {},
+            success: function (r) {
+                console.log(r)
+                var return_data = eval('(' + r + ')');
+                console.log(return_data)
+                // todo：遍历返回参数，在地图上展示坐标点
+                var data_arr = new Array();
+                for (var i = 0; i < return_data.length; i++) {
+                    data_arr[i]={"lng":return_data[i].bd_lon , "lat":return_data[i].bd_lat , "count":return_data[i].person_num}
+                    // var marker = new BMapGL.Marker(new BMapGL.Point(return_data[i].bd_lon, return_data[i].bd_lat)); // 创建点
+                    // map.addOverlay(marker);            //增加点
+                }
+
+                //创建热力图覆盖物层
+                var heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":20},
+                    {0.1:'rgb(65, 105, 225)',0.3:'rgb(0, 0, 205)',0.5:'rgb(70, 130, 180)',0.7:'rgb(255, 215, 0)',0.9:'rgb(255, 0, 0)'});
+                //将覆盖物添加到百度地图上
+                map.addOverlay(heatmapOverlay);
+                //为热力图添加数据，min和max是数据权重的最大最小值
+                heatmapOverlay.setDataSet({data:data_arr,min:0,max:600});
+                heatmapOverlay.show();
+            }
+
+
+        });
+    }
+
+    function show_left_chart() {
+        var param = {
+            "count_date": "20230705", "city_code4": "2301"
+        };
+        var strJson = JSON.stringify(param); // js对象转字符串
+        $.ajax({
+            url: "/point/queryNumByDate",
+            type: "post",
+            contentType: "application/json", //json请求
+            data: strJson,
+            success: function (r) {
+                console.log(r)
+                var return_data = eval('(' + r + ')');
+                var x_data = new Array();
+                var num_data = new Array();
+                console.log(return_data)
+                for (var i = 0; i < return_data.length; i++) {
+                    x_data[i] = return_data[i].dis_name;
+                    num_data[i] = return_data[i].person_num
+                }
+
+                var myChart = echarts.init(document.getElementById("left_div"));
+                var option = {
+                    title: {
+                        text: '2023年7月5日区县访客情况'
+                    },
+                    xAxis: {
+                        data: x_data
+                    },
+                    yAxis: {}
+                    , series: [{
+                        type: 'bar',
+                        data: num_data
+                    }
+                    ]
+                }
+                myChart.setOption(option);
+            }
+        });
+
+    }
+
+</script>
+</body>
+</html>

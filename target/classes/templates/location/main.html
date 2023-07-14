@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content ">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content">
+                    <form class="form-horizontal m-t" id="signupForm">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">所在地 bdlon：</label>
+                            <div class="col-sm-8">
+                                <input id="bdLon" name="bdLon" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">所在地 bdLat：</label>
+                            <div class="col-sm-8">
+                                <input id="bdLat" name="bdLat" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group" style = "height:300px">
+                            <div id = "point_map" class="col-sm-12" style = "height:600px"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript" src="/js/appjs/location/add.js">
+</script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=dhDqxYiu0SWUzxzR9FViGTBnf16PLlh7"></script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?type=webgl&v=1.0&ak=dhDqxYiu0SWUzxzR9FViGTBnf16PLlh7"></script>
+
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=dhDqxYiu0SWUzxzR9FViGTBnf16PLlh7"></script>
+
+
+<script>
+
+    //初始化地图
+    var mapDemo = new BMapGL.Map("point_map");
+    var point = new BMapGL.Point(126.65500546097108,45.75883286408706);
+    mapDemo.centerAndZoom(point, 15);
+    mapDemo.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+    //获取当前位置
+    var geolocation = new BMap.Geolocation();
+    geolocation.getCurrentPosition(function(result){
+        var latitude = result.point.lat;
+        var longitude = result.point.lng;
+
+        // var mapDemo = new BMapGL.Map("point_map");
+        var newpoint = new BMapGL.Point(longitude,latitude);
+        mapDemo.centerAndZoom(newpoint, 15);
+        var marker = new BMapGL.Marker(new BMapGL.Point(longitude, latitude)); // 创建点
+        mapDemo.addOverlay(marker);            //增加点
+        $("#bdLon").val(longitude)
+        $("#bdLat").val(latitude)
+    });
+
+    // 获取input元素
+    // var inputxElement = document.getElementById("bdLon");
+    // // 获取input的值
+    // var inputxValue = inputxElement.value;
+    // // 将值转换为浮点数
+    // var x = parseFloat(inputxValue);
+    //
+    // // 获取input元素
+    // var inputElement = document.getElementById("bdLat");
+    // // 获取input的值
+    // var inputValue = inputElement.value;
+    // // 将值转换为浮点数
+    // var y = parseFloat(inputValue);
+
+
+
+    // var ggPoint = new BMapGL.Point(x,y);
+    //
+    // var marker = new BMapGL.Marker(new BMapGL.Point(x, y)); // 创建点
+    // mapDemo.addOverlay(marker);            //增加点
+    //
+    // //添加谷歌marker和label
+    // var markergg = new BMapGL.Marker(ggPoint);
+    // bm.addOverlay(markergg); //添加谷歌marker
+    // var labelgg = new BMapGL.Label("未转换的谷歌标注（错误）",{offset:new BMapGL.Size(20,-10)});
+    // markergg.setLabel(labelgg); //添加谷歌label
+    //
+    // //坐标转换完之后的回调函数
+    // translateCallback = function (data){
+    //     console.log(data);
+    //     if(data.status === 0) {
+    //         var marker = new BMapGL.Marker(data.points[0]);
+    //         bm.addOverlay(marker);
+    //         var label = new BMapGL.Label("转换后的百度标注（正确）",{offset:new BMapGL.Size(20,-10)});
+    //         marker.setLabel(label); //添加百度label
+    //         bm.setCenter(data.points[0]);
+    //     }
+    // }
+    //
+    // setTimeout(function(){
+    //     var convertor = new BMapGL.Convertor();
+    //     var pointArr = [];
+    //     pointArr.push(ggPoint);
+    //     convertor.translate(pointArr, COORDINATES_GCJ02, COORDINATES_BD09, translateCallback)
+    // }, 1000);
+
+    // var geolocation = new BMapGL.Geolocation();
+    // geolocation.getCurrentPosition(function(r){
+    //     // if(this.getStatus() == BMAP_STATUS_SUCCESS){
+    // var mk = new BMapGL.Marker(r.point);
+    // map.addOverlay(mk);
+    // map.panTo(r.point);
+    // // alert('您的位置：' + r.point.lng + ',' + r.point.lat);
+    // var newpoint = new BMapGL.Point(r.point.lng, r.point.lat);
+    // mapDemo.centerAndZoom(newpoint, 15);
+    // var marker = new BMapGL.Marker(new BMapGL.Point(r.point.lng, r.point.lat)); // 创建点
+    // mapDemo.addOverlay(marker);            //增加点
+    // $("#bdLon").val(r.point.lng)
+    // $("#bdLat").val(r.point.lat)
+        // }
+        // else {
+        //     alert('failed' + this.getStatus());
+        //     $("#bdLon").val(0)
+        //     $("#bdLat").val(0)
+        // }
+    // });
+</script>
+
+</body>
+</html>

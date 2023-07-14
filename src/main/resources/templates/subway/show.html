@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+
+<body class="gray-bg">
+<h1 align=center>访客监控</h1>
+<!--<div id="left_div" class="col-md-3" style="height:75% ; border:1px solid #cccccc"> 111</div>-->
+<div id="md_div" class="col-md-6" style="height:75%; border:1px solid #cccccc"> 111</div>
+<!--<div id="right_div" class="col-md-3" style="height:75%; border:1px solid #cccccc">-->
+<!--  <div id="right_top_div"  style="height:60%; width: 100%"> a</div>-->
+<!--  <div id="right_bottom_div" style="height:40%; width: 100%"> b</div>-->
+<!--</div>-->
+<!--<div id="bottom_div" class="col-md-12" style="width:100%;height:20%; border:1px solid #cccccc"> 111</div>-->
+<div th:include="include :: footer"></div>
+<script src="/js/plugins/echarts/echarts-all.js"></script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=dhDqxYiu0SWUzxzR9FViGTBnf16PLlh7">
+</script>
+
+<script>
+  $(function () {
+    show_left_chart();
+  })
+  function show_left_chart() {
+    var param = {
+      "date": "20230713"
+    };
+    var strJson = JSON.stringify(param); // js对象转字符串
+    $.ajax({
+      url: "/subway/queryNumByDate",
+      type: "post",
+      contentType: "application/json", //json请求
+      data: strJson,
+      success: function (r) {
+        console.log(r)
+        var return_data = eval('(' + r + ')');
+        var x_data = new Array();
+        var num_data = new Array();
+        console.log(return_data)
+        for (var i = 0; i < return_data.length; i++) {
+          x_data[i] = return_data[i].subway_city;
+          num_data[i] = return_data[i].record_count
+        }
+
+        var myChart = echarts.init(document.getElementById("md_div"));
+        var option = {
+          title: {
+            text: '2023年7月13日站点点击情况'
+          },
+          xAxis: {
+            data: x_data
+          },
+          yAxis: {}
+          , series: [{
+            type: 'bar',
+            data: num_data
+          }
+          ]
+        }
+        myChart.setOption(option);
+      }
+    });
+  }
+
+</script>
+</body>
+</html>
